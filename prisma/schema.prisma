@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Vendor {
+  id                String   @id @default(cuid())
+  name              String
+  contactTelegram   String?  @map("contact_telegram")
+  businessManagerId String?  @map("business_manager_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt
+  
+  adAccounts AdAccount[]
+  
+  @@map("vendors")
+}
+
+model AdAccount {
+  id                String   @id
+  name              String
+  vendorId          String?  @map("vendor_id")
+  businessManagerId String?  @map("business_manager_id")
+  status            String?
+  currency          String?
+  timezone          String?
+  lastSeenAt        DateTime? @map("last_seen_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt
+  
+  vendor         Vendor?          @relation(fields: [vendorId], references: [id])
+  accountMetrics AccountMetric[]
+  accountActions AccountAction[]
+  
+  @@map("ad_accounts")
+}
+
+model AccountMetric {
+  id           String   @id @default(cuid())
+  adAccountId  String   @map("ad_account_id")
+  date         DateTime @default(now())
+  spend        Float?
+  spendCap     Float?   @map("spend_cap")
+  clicks       Int?
+  impressions  Int?
+  cpc          Float?
+  balance      Float?
+  statusAtFetch String? @map("status_at_fetch")
+  fetchedAt    DateTime @default(now()) @map("fetched_at")
+  
+  adAccount AdAccount @relation(fields: [adAccountId], references: [id])
+  
+  @@unique([adAccountId, date])
+  @@map("account_metrics")
+}
+
+model AccountAction {
+  id          String   @id @default(cuid())
+  performedBy String   @map("performed_by")
+  adAccountId String   @map("ad_account_id")
+  targetType  String?  @map("target_type")
+  targetId    String?  @map("target_id")
+  action      String
+  payload     String? // JSON as string
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  adAccount AdAccount @relation(fields: [adAccountId], references: [id])
+  
+  @@map("account_actions")
+}
