@@ -10,10 +10,6 @@
       "schedule": "*/5 * * * *"
     }
   ],
-  "env": {
-    "NEXTAUTH_URL": "@next-auth-url",
-    "NEXTAUTH_SECRET": "@next-auth-secret"
-  },
   "build": {
     "env": {
       "PRISMA_GENERATE_DATAPROXY": "true"
